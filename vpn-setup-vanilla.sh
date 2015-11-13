@@ -20,6 +20,8 @@ VPN_PASS="mypass"
 VPN_LOCAL="192.168.0.150"
 VPN_REMOTE="192.168.0.151-200"
 
+VPN_PUBLIC="192.80.146.167"
+
 yum -y groupinstall "Development Tools"
 rpm -Uvh http://poptop.sourceforge.net/yum/stable/rhel6/pptp-release-current.noarch.rpm
 yum -y install policycoreutils policycoreutils
@@ -43,6 +45,9 @@ echo "$VPN_USER pptpd $VPN_PASS *" >> /etc/ppp/chap-secrets
 service iptables start
 echo "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE" >> /etc/rc.local
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+#添加转发规则 10.168.0.0/24 为上面设定的网段，xxx.xxx.xxx.xxx 为vps外网ip
+iptables -t nat -A POSTROUTING -s 10.168.0.0/24 -j SNAT --to- source $VPN_PUBLIC
+
 service iptables save
 service iptables restart
 
